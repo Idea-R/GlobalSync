@@ -40,6 +40,11 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
   const [importError, setImportError] = useState('');
   const [flavorText, setFlavorText] = useState('');
   const [detectedTimezone] = useState(() => detectUserTimezone());
+  
+  // State for initial profile import (moved to top level to fix hooks violation)
+  const [showInitialImport, setShowInitialImport] = useState(false);
+  const [initialImportString, setInitialImportString] = useState('');
+  const [initialImportError, setInitialImportError] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -108,6 +113,33 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
     setShowSettings(false);
   };
 
+  const handleInitialImportProfile = () => {
+    if (!initialImportString.trim()) {
+      setInitialImportError('Please enter a profile share string');
+      return;
+    }
+
+    const parsed = parseShareString(initialImportString.trim());
+    if (!parsed || !parsed.name) {
+      setInitialImportError('Invalid share string format. Please check and try again.');
+      return;
+    }
+
+    onUpdatePersonalInfo({
+      name: parsed.name,
+      timezone: parsed.timezone || 'GMT+0',
+      status: (parsed.status as StatusType) || 'vibing',
+      workHours: parsed.workHours || '9-17',
+      sleepHours: parsed.sleepHours || '23-7',
+      autoStatus: parsed.autoStatus !== undefined ? parsed.autoStatus : true,
+      avatar: parsed.avatar,
+    });
+    
+    setInitialImportString('');
+    setInitialImportError('');
+    setShowInitialImport(false);
+  };
+
   const handleStatusChange = (status: StatusType) => {
     onUpdatePersonalInfo({ status });
     setShowStatusDropdown(false);
@@ -143,37 +175,6 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
     // Auto-populate timezone on first load if not already set
     const shouldAutoPopulate = personalInfo.timezone === 'GMT+0' && detectedTimezone !== 'GMT+0';
     
-    const [showImport, setShowImport] = useState(false);
-    const [importString, setImportString] = useState('');
-    const [importError, setImportError] = useState('');
-    
-    const handleImportProfile = () => {
-      if (!importString.trim()) {
-        setImportError('Please enter a profile share string');
-        return;
-      }
-
-      const parsed = parseShareString(importString.trim());
-      if (!parsed || !parsed.name) {
-        setImportError('Invalid share string format. Please check and try again.');
-        return;
-      }
-
-      onUpdatePersonalInfo({
-        name: parsed.name,
-        timezone: parsed.timezone || 'GMT+0',
-        status: (parsed.status as StatusType) || 'vibing',
-        workHours: parsed.workHours || '9-17',
-        sleepHours: parsed.sleepHours || '23-7',
-        autoStatus: parsed.autoStatus !== undefined ? parsed.autoStatus : true,
-        avatar: parsed.avatar,
-      });
-      
-      setImportString('');
-      setImportError('');
-      setShowImport(false);
-    };
-    
     return (
       <div className={`rounded-lg p-8 mb-8 animate-tactical-deploy border ${
         theme === 'dark' 
@@ -195,16 +196,16 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
           {/* Import Profile Option */}
           <div className="text-center mb-4">
             <button
-              onClick={() => setShowImport(!showImport)}
+              onClick={() => setShowInitialImport(!showInitialImport)}
               className={`text-sm underline transition-colors ${
                 theme === 'dark' ? 'text-tactical-amber hover:text-yellow-500' : 'text-blue-600 hover:text-blue-700'
               }`}
             >
-              {showImport ? 'Create New Profile' : 'Import Existing Profile'}
+              {showInitialImport ? 'Create New Profile' : 'Import Existing Profile'}
             </button>
           </div>
           
-          {showImport ? (
+          {showInitialImport ? (
             <div className="space-y-4">
               <div>
                 <label className={`block text-sm font-medium mb-2 ${
@@ -213,8 +214,8 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
                   Profile Share String
                 </label>
                 <textarea
-                  value={importString}
-                  onChange={(e) => setImportString(e.target.value)}
+                  value={initialImportString}
+                  onChange={(e) => setInitialImportString(e.target.value)}
                   placeholder="Paste GlobalSync://... share string here"
                   className={`w-full px-4 py-3 rounded-lg resize-none focus:outline-none ${
                     theme === 'dark'
@@ -223,18 +224,18 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
                   }`}
                   rows={3}
                 />
-                {importError && (
+                {initialImportError && (
                   <p className={`text-xs mt-1 ${
                     theme === 'dark' ? 'text-warning-red' : 'text-red-600'
                   }`}>
-                    {importError}
+                    {initialImportError}
                   </p>
                 )}
               </div>
               
               <button
-                onClick={handleImportProfile}
-                disabled={!importString.trim()}
+                onClick={handleInitialImportProfile}
+                disabled={!initialImportString.trim()}
                 className={`w-full px-4 py-3 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center ${
                   theme === 'dark'
                     ? 'bg-tactical-amber text-tactical-black hover:bg-yellow-500'
