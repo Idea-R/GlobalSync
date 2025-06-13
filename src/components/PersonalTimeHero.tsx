@@ -544,7 +544,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
             </button>
             
             {showStatusDropdown && (
-              <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-xl z-50 border ${
+              <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-xl z-70 border ${
                 theme === 'dark' 
                   ? 'bg-tactical-black border-tactical-gray' 
                   : 'bg-white border-gray-200'
