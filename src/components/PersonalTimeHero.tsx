@@ -731,3 +731,5 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
     </div>
   );
 };
+
+export { PersonalTimeHero }
