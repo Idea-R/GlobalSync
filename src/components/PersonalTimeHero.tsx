@@ -593,7 +593,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
 
       {/* Settings Panel */}
       {showSettings && (
-        <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-2xl z-[100] border backdrop-blur-sm ${
+        <div className={`fixed top-20 left-4 right-4 mt-2 rounded-lg shadow-2xl z-[70] border backdrop-blur-sm ${
           theme === 'dark' 
             ? 'bg-tactical-black/95 border-tactical-gray' 
             : 'bg-white/95 border-gray-200'
