@@ -597,8 +597,8 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
       {showSettings && (
         <div className={`fixed top-20 left-4 right-4 mt-2 rounded-lg shadow-2xl z-[60] border backdrop-blur-sm ${
           theme === 'dark' 
-            ? 'bg-tactical-black/95 border-tactical-gray' 
-            : 'bg-white/95 border-gray-200'
+            ? 'bg-tactical-black border-tactical-gray' 
+            : 'bg-white border-gray-200'
         }`}>
           {/* Settings Header with Close Button */}
           <div className={`flex items-center justify-between px-6 py-4 border-b ${
