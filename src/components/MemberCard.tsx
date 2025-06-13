@@ -77,7 +77,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
   };
 
   return (
-    <div className={`rounded-lg p-6 transition-all duration-300 animate-tactical-deploy relative group border ${
+    <div className={`relative rounded-lg p-6 transition-all duration-300 animate-tactical-deploy relative group border ${
       theme === 'dark'
         ? 'bg-tactical-charcoal border-tactical-gray hover:border-tactical-amber/50 hover:shadow-lg hover:shadow-tactical-amber/10'
         : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100'
