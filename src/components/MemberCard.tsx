@@ -216,7 +216,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
         </button>
         
         {showStatusDropdown && (
-          <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-xl z-40 border ${
+          <div className={`fixed top-20 left-4 right-4 mt-2 rounded-lg shadow-2xl z-[70] border backdrop-blur-sm ${
             theme === 'dark' 
               ? 'bg-tactical-black border-tactical-gray' 
               : 'bg-white border-gray-200'
