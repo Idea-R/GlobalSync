@@ -341,7 +341,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
       {/* Backdrop overlay for settings */}
       {showSettings && (
         <div 
-          className="fixed inset-0 bg-black/20 z-[90]"
+          className="fixed inset-0 bg-black/20 z-[60]"
           onClick={() => setShowSettings(false)}
         />
       )}
