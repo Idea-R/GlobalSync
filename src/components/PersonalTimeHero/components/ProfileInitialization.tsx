@@ -35,12 +35,13 @@ export const ProfileInitialization: React.FC<ProfileInitializationProps> = ({
 
     onUpdatePersonalInfo({
       name: parsed.name,
-      timezone: parsed.timezone || 'GMT+0',
+      timezone: parsed.timezone ? parsed.timezone.replace('GMT', 'UTC') : 'UTC+0',
       status: (parsed.status as StatusType) || 'vibing',
       workHours: parsed.workHours || '9-17',
       sleepHours: parsed.sleepHours || '23-7',
       autoStatus: parsed.autoStatus !== undefined ? parsed.autoStatus : true,
       avatar: parsed.avatar,
+      title: parsed.title,
     });
     
     setInitialImportString('');
@@ -70,14 +71,16 @@ export const ProfileInitialization: React.FC<ProfileInitializationProps> = ({
       
       <div className="max-w-md mx-auto space-y-4">
         {/* Import Profile Option */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-6">
           <button
             onClick={() => setShowInitialImport(!showInitialImport)}
-            className={`text-sm underline transition-colors ${
-              theme === 'dark' ? 'text-tactical-amber hover:text-yellow-500' : 'text-blue-600 hover:text-blue-700'
+            className={`px-6 py-3 rounded-lg border transition-all duration-200 font-medium text-sm hover:scale-105 ${
+              theme === 'dark' 
+                ? 'bg-tactical-black border-tactical-gray text-tactical-amber hover:border-tactical-amber hover:bg-tactical-gray/20' 
+                : 'bg-gray-50 border-gray-300 text-blue-600 hover:border-blue-500 hover:bg-blue-50'
             }`}
           >
-            {showInitialImport ? 'Create New Profile' : 'Import Existing Profile'}
+            {showInitialImport ? '← Create New Profile' : '📥 Import Existing Profile'}
           </button>
         </div>
         
@@ -152,6 +155,29 @@ export const ProfileInitialization: React.FC<ProfileInitializationProps> = ({
               }`}>
                 Press Enter to confirm your name
               </p>
+            </div>
+            
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Title/Role (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Senior Developer, AI Engineer"
+                className={`w-full px-4 py-3 rounded-lg transition-colors focus:outline-none ${
+                  theme === 'dark'
+                    ? 'bg-tactical-black border border-tactical-gray text-white placeholder-gray-500 focus:border-tactical-amber'
+                    : 'bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+                }`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const target = e.target as HTMLInputElement;
+                    onUpdatePersonalInfo({ title: target.value.trim() });
+                  }
+                }}
+              />
             </div>
             
             <div>

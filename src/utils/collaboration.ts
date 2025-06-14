@@ -1,5 +1,5 @@
 import { TeamMember, PersonalInfo, CollaborationWindow } from '../types';
-import { getCurrentTimeInTimezone, isInTimeRange } from './timezone';
+import { getCurrentTimeInTimezone, isInTimeRange, getGMTOffset } from './timezone';
 
 export const findCollaborationWindows = (
   personalInfo: PersonalInfo,
@@ -22,19 +22,21 @@ export const findCollaborationWindows = (
 
   const windows: CollaborationWindow[] = [];
   
-  // Check each hour of the day (0-23)
-  for (let hour = 0; hour < 24; hour++) {
+  // Check each UTC hour of the day (0-23)
+  for (let utcHour = 0; utcHour < 24; utcHour++) {
     const availableMembers: string[] = [];
     
     allMembers.forEach(member => {
-      const memberTime = new Date();
+      // Convert UTC hour to member's local time
       const offset = getGMTOffset(member.timezone);
-      const memberHour = (hour + offset + 24) % 24;
+      const memberLocalHour = (utcHour + offset + 24) % 24;
       
-      const isWorkTime = isInHourRange(memberHour, member.workHours);
-      const isSleepTime = isInHourRange(memberHour, member.sleepHours);
+      const isWorkTime = isInHourRange(memberLocalHour, member.workHours);
+      const isSleepTime = isInHourRange(memberLocalHour, member.sleepHours);
       
-      // Available if not sleeping and either working or free time
+      // Member is available if:
+      // 1. Not sleeping AND
+      // 2. Either working OR in free time (not sleeping and not working)
       if (!isSleepTime) {
         availableMembers.push(member.name);
       }
@@ -42,10 +44,10 @@ export const findCollaborationWindows = (
     
     // Only create window if at least 2 people are available
     if (availableMembers.length >= 2) {
-      const period = getPeriodFromHour(hour);
+      const period = getPeriodFromHour(utcHour);
       windows.push({
-        startHour: hour,
-        endHour: (hour + 1) % 24,
+        startHour: utcHour,
+        endHour: (utcHour + 1) % 24,
         availableMembers,
         period
       });
@@ -54,14 +56,6 @@ export const findCollaborationWindows = (
   
   // Merge consecutive hours into longer windows
   return mergeConsecutiveWindows(windows);
-};
-
-const getGMTOffset = (timezone: string): number => {
-  const match = timezone.match(/GMT([+-])(\d+)/);
-  if (!match) return 0;
-  const sign = match[1] === '+' ? 1 : -1;
-  const hours = parseInt(match[2], 10);
-  return sign * hours;
 };
 
 const isInHourRange = (hour: number, timeRange: string): boolean => {

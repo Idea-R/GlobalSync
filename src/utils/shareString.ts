@@ -4,6 +4,7 @@ import { AppData } from '../types';
 export const generateShareString = (info: PersonalInfo): string => {
   const parts = [
     info.name,
+    info.title || '',
     info.timezone,
     info.status,
     info.workHours,
@@ -19,6 +20,7 @@ export const generateShareString = (info: PersonalInfo): string => {
 const _encodeMemberOrPersonalInfo = (info: PersonalInfo | TeamMember): string => {
   const parts = [
     info.name,
+    info.title || '',
     info.timezone,
     info.status,
     info.workHours,
@@ -34,14 +36,19 @@ const _decodeMemberOrPersonalInfo = (encoded: string): Partial<PersonalInfo | Te
   const parts = encoded.split('^');
   if (parts.length < 5) return null;
   
+  // Handle both old format (without title) and new format (with title)
+  const hasTitle = parts.length >= 8;
+  const titleOffset = hasTitle ? 1 : 0;
+  
   return {
     name: parts[0],
-    timezone: parts[1],
-    status: parts[2] as any,
-    workHours: parts[3],
-    sleepHours: parts[4],
-    avatar: parts[5] || undefined,
-    autoStatus: parts[6] === '1',
+    title: hasTitle ? (parts[1] || undefined) : undefined,
+    timezone: parts[1 + titleOffset],
+    status: parts[2 + titleOffset] as any,
+    workHours: parts[3 + titleOffset],
+    sleepHours: parts[4 + titleOffset],
+    avatar: parts[5 + titleOffset] || undefined,
+    autoStatus: parts[6 + titleOffset] === '1',
   };
 };
 
@@ -111,14 +118,19 @@ export const parseShareString = (shareString: string): Partial<TeamMember> | nul
     return null;
   }
   
+  // Handle both old format (without title) and new format (with title)
+  const hasTitle = parts.length >= 8;
+  const titleOffset = hasTitle ? 1 : 0;
+  
   return {
     name: parts[0],
-    timezone: parts[1],
-    status: parts[2] as any,
-    workHours: parts[3],
-    sleepHours: parts[4],
-    avatar: parts[5] || undefined,
-    autoStatus: parts[6] === '1',
+    title: hasTitle ? (parts[1] || undefined) : undefined,
+    timezone: parts[1 + titleOffset],
+    status: parts[2 + titleOffset] as any,
+    workHours: parts[3 + titleOffset],
+    sleepHours: parts[4 + titleOffset],
+    avatar: parts[5 + titleOffset] || undefined,
+    autoStatus: parts[6 + titleOffset] === '1',
   };
 };
 

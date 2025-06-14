@@ -21,7 +21,8 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
   const [shareString, setShareString] = useState('');
   const [customData, setCustomData] = useState({
     name: '',
-    timezone: 'GMT+0',
+    title: '',
+    timezone: 'UTC+0',
     status: 'vibing' as StatusType,
     workHours: '9-17',
     sleepHours: '23-7',
@@ -40,7 +41,8 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
     
     onAddMember({
       name: parsed.name,
-      timezone: parsed.timezone || 'GMT+0',
+      title: parsed.title,
+      timezone: parsed.timezone || 'UTC+0',
       status: (parsed.status as StatusType) || 'vibing',
       workHours: parsed.workHours || '9-17',
       sleepHours: parsed.sleepHours || '23-7',
@@ -65,7 +67,8 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
     setShareString('');
     setCustomData({
       name: '',
-      timezone: 'GMT+0',
+      title: '',
+      timezone: 'UTC+0',
       status: 'vibing',
       workHours: '9-17',
       sleepHours: '23-7',
@@ -178,7 +181,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
               <p className={`text-xs mt-1 ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Format: GlobalSync://Name|Timezone|Status|WorkHours|SleepHours|Avatar|AutoStatus
+                Format: GlobalSync://Name|Title|Timezone|Status|WorkHours|SleepHours|Avatar|AutoStatus
               </p>
             </div>
             
@@ -207,6 +210,25 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 value={customData.name}
                 onChange={(e) => setCustomData({ ...customData, name: e.target.value })}
                 placeholder="Enter developer name"
+                className={`w-full px-3 py-2 rounded-lg focus:outline-none ${
+                  theme === 'dark'
+                    ? 'bg-tactical-black border border-tactical-gray text-white placeholder-gray-500 focus:border-tactical-amber'
+                    : 'bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500'
+                }`}
+              />
+            </div>
+            
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Title/Role
+              </label>
+              <input
+                type="text"
+                value={customData.title}
+                onChange={(e) => setCustomData({ ...customData, title: e.target.value })}
+                placeholder="e.g. Senior Developer, AI Engineer"
                 className={`w-full px-3 py-2 rounded-lg focus:outline-none ${
                   theme === 'dark'
                     ? 'bg-tactical-black border border-tactical-gray text-white placeholder-gray-500 focus:border-tactical-amber'

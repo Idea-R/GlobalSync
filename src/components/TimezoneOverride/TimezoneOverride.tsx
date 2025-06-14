@@ -12,27 +12,27 @@ interface TimezoneOverrideProps {
 }
 
 const COMMON_TIMEZONES = [
-  { name: 'Hawaii (HST)', offset: -10 },
-  { name: 'Alaska (AKST)', offset: -9 },
-  { name: 'Pacific (PST)', offset: -8 },
-  { name: 'Mountain (MST)', offset: -7 },
-  { name: 'Central (CST)', offset: -6 },
-  { name: 'Eastern (EST)', offset: -5 },
-  { name: 'Atlantic', offset: -4 },
-  { name: 'Brasília', offset: -3 },
-  { name: 'UTC/GMT', offset: 0 },
-  { name: 'London (GMT)', offset: 0 },
-  { name: 'Paris (CET)', offset: 1 },
-  { name: 'Cairo (EET)', offset: 2 },
-  { name: 'Moscow (MSK)', offset: 3 },
-  { name: 'Dubai (GST)', offset: 4 },
-  { name: 'India (IST)', offset: 5.5 },
-  { name: 'Bangladesh', offset: 6 },
-  { name: 'Bangkok (ICT)', offset: 7 },
-  { name: 'Beijing (CST)', offset: 8 },
-  { name: 'Tokyo (JST)', offset: 9 },
-  { name: 'Sydney (AEST)', offset: 10 },
-  { name: 'Auckland (NZST)', offset: 12 },
+  { name: 'Hawaii (HST)', offset: -10, id: 'hawaii' },
+  { name: 'Alaska (AKST)', offset: -9, id: 'alaska' },
+  { name: 'Pacific (PST)', offset: -8, id: 'pacific' },
+  { name: 'Mountain (MST)', offset: -7, id: 'mountain' },
+  { name: 'Central (CST)', offset: -6, id: 'central' },
+  { name: 'Eastern (EST)', offset: -5, id: 'eastern' },
+  { name: 'Atlantic', offset: -4, id: 'atlantic' },
+  { name: 'Brasília', offset: -3, id: 'brasilia' },
+  { name: 'UTC/GMT', offset: 0, id: 'utc' },
+  { name: 'London (GMT)', offset: 0, id: 'london' },
+  { name: 'Paris (CET)', offset: 1, id: 'paris' },
+  { name: 'Cairo (EET)', offset: 2, id: 'cairo' },
+  { name: 'Moscow (MSK)', offset: 3, id: 'moscow' },
+  { name: 'Dubai (GST)', offset: 4, id: 'dubai' },
+  { name: 'India (IST)', offset: 5.5, id: 'india' },
+  { name: 'Bangladesh', offset: 6, id: 'bangladesh' },
+  { name: 'Bangkok (ICT)', offset: 7, id: 'bangkok' },
+  { name: 'Beijing (CST)', offset: 8, id: 'beijing' },
+  { name: 'Tokyo (JST)', offset: 9, id: 'tokyo' },
+  { name: 'Sydney (AEST)', offset: 10, id: 'sydney' },
+  { name: 'Auckland (NZST)', offset: 12, id: 'auckland' },
 ];
 
 export const TimezoneOverride: React.FC<TimezoneOverrideProps> = ({
@@ -75,7 +75,7 @@ export const TimezoneOverride: React.FC<TimezoneOverrideProps> = ({
       />
       
       {/* Modal */}
-      <div className={`relative w-full max-w-md mx-4 rounded-lg shadow-xl ${
+      <div className={`relative w-full max-w-md mx-4 rounded-lg shadow-xl animate-tactical-deploy ${
         theme === 'dark' 
           ? 'bg-tactical-black border border-tactical-amber/20' 
           : 'bg-white border border-gray-200'
@@ -150,7 +150,7 @@ export const TimezoneOverride: React.FC<TimezoneOverrideProps> = ({
               } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             >
               {COMMON_TIMEZONES.map((tz) => (
-                <option key={tz.offset} value={tz.offset}>
+                <option key={tz.id} value={tz.offset}>
                   {tz.name} ({formatOffset(tz.offset)})
                 </option>
               ))}

@@ -6,7 +6,7 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 1; /* Just above canvas/background */
+  z-index: 0; /* Behind content but above background */
   overflow: hidden;
   color: rgba(99, 102, 241, 0.12);
 }

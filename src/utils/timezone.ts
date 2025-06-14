@@ -1,8 +1,9 @@
 export const getGMTOffset = (timezone: string): number => {
-  const match = timezone.match(/GMT([+-])(\d+)/);
+  // Support both GMT and UTC prefixes for backward compatibility
+  const match = timezone.match(/(GMT|UTC)([+-])(\d+(?:\.\d+)?)/);
   if (!match) return 0;
-  const sign = match[1] === '+' ? 1 : -1;
-  const hours = parseInt(match[2], 10);
+  const sign = match[2] === '+' ? 1 : -1;
+  const hours = parseFloat(match[3]);
   return sign * hours;
 };
 
@@ -79,59 +80,69 @@ export const getSchedulePeriod = (currentTime: Date, workHours: string, sleepHou
   return 'available';
 };
 
-// Detect user's timezone and convert to GMT format
+// Detect user's timezone and convert to UTC format
 export const detectUserTimezone = (): string => {
   try {
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const now = new Date();
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const localTime = new Date(utcTime + (now.getTimezoneOffset() * 60000));
+    // Get the timezone offset in minutes (negative for west of UTC, positive for east)
+    const offsetMinutes = new Date().getTimezoneOffset();
     
-    // Create a date in the user's timezone
-    const userTime = new Date(now.toLocaleString("en-US", {timeZone}));
-    const offset = Math.round((userTime.getTime() - utcTime) / (1000 * 60 * 60));
+    // Convert to hours and invert the sign (JavaScript gives opposite of what we need)
+    const offsetHours = -(offsetMinutes / 60);
     
-    const sign = offset >= 0 ? '+' : '';
-    return `GMT${sign}${offset}`;
+    // Format as UTC string
+    const sign = offsetHours >= 0 ? '+' : '';
+    return `UTC${sign}${offsetHours}`;
   } catch (error) {
     console.error('Failed to detect timezone:', error);
-    return 'GMT+0';
+    return 'UTC+0';
   }
 };
 
 // Enhanced timezone data with common abbreviations and cities
 export const getTimezoneInfo = (gmtOffset: string) => {
+  // Support both GMT and UTC prefixes
+  const normalizedOffset = gmtOffset.replace('GMT', 'UTC');
+  
   const timezoneMap: Record<string, { abbreviations: string[], cities: string[] }> = {
-    'GMT-12': { abbreviations: ['BIT'], cities: ['Baker Island'] },
-    'GMT-11': { abbreviations: ['SST'], cities: ['Samoa', 'Midway'] },
-    'GMT-10': { abbreviations: ['HST'], cities: ['Hawaii', 'Honolulu'] },
-    'GMT-9': { abbreviations: ['AKST'], cities: ['Alaska', 'Anchorage'] },
-    'GMT-8': { abbreviations: ['PST', 'PT'], cities: ['Los Angeles', 'Seattle', 'Vancouver'] },
-    'GMT-7': { abbreviations: ['MST', 'PDT'], cities: ['Denver', 'Phoenix', 'Calgary'] },
-    'GMT-6': { abbreviations: ['CST', 'MDT'], cities: ['Chicago', 'Dallas', 'Mexico City'] },
-    'GMT-5': { abbreviations: ['EST', 'CDT'], cities: ['New York', 'Toronto', 'Miami'] },
-    'GMT-4': { abbreviations: ['AST', 'EDT'], cities: ['Halifax', 'Caracas', 'Santiago'] },
-    'GMT-3': { abbreviations: ['ART', 'BRT'], cities: ['Buenos Aires', 'São Paulo', 'Montevideo'] },
-    'GMT-2': { abbreviations: ['GST'], cities: ['South Georgia'] },
-    'GMT-1': { abbreviations: ['CVT'], cities: ['Cape Verde', 'Azores'] },
-    'GMT+0': { abbreviations: ['GMT', 'UTC'], cities: ['London', 'Dublin', 'Lisbon'] },
-    'GMT+1': { abbreviations: ['CET'], cities: ['Berlin', 'Paris', 'Rome', 'Madrid'] },
-    'GMT+2': { abbreviations: ['EET'], cities: ['Cairo', 'Helsinki', 'Athens', 'Kiev'] },
-    'GMT+3': { abbreviations: ['MSK'], cities: ['Moscow', 'Istanbul', 'Riyadh'] },
-    'GMT+4': { abbreviations: ['GST'], cities: ['Dubai', 'Baku', 'Tbilisi'] },
-    'GMT+5': { abbreviations: ['PKT'], cities: ['Karachi', 'Tashkent', 'Yekaterinburg'] },
-    'GMT+6': { abbreviations: ['BST'], cities: ['Dhaka', 'Almaty', 'Omsk'] },
-    'GMT+7': { abbreviations: ['ICT'], cities: ['Bangkok', 'Jakarta', 'Ho Chi Minh'] },
-    'GMT+8': { abbreviations: ['CST', 'SGT'], cities: ['Beijing', 'Singapore', 'Manila', 'Perth'] },
-    'GMT+9': { abbreviations: ['JST', 'KST'], cities: ['Tokyo', 'Seoul', 'Pyongyang'] },
-    'GMT+10': { abbreviations: ['AEST'], cities: ['Sydney', 'Melbourne', 'Brisbane'] },
-    'GMT+11': { abbreviations: ['NCT'], cities: ['New Caledonia', 'Solomon Islands'] },
-    'GMT+12': { abbreviations: ['NZST'], cities: ['Auckland', 'Wellington', 'Fiji'] },
-    'GMT+13': { abbreviations: ['NZDT'], cities: ['Auckland (DST)', 'Samoa'] },
-    'GMT+14': { abbreviations: ['LINT'], cities: ['Line Islands', 'Kiribati'] },
+    'UTC-12': { abbreviations: ['BIT'], cities: ['Baker Island'] },
+    'UTC-11': { abbreviations: ['SST'], cities: ['Samoa', 'Midway'] },
+    'UTC-10': { abbreviations: ['HST'], cities: ['Hawaii', 'Honolulu'] },
+    'UTC-9': { abbreviations: ['AKST'], cities: ['Alaska', 'Anchorage'] },
+    'UTC-8': { abbreviations: ['PST', 'PT'], cities: ['Los Angeles', 'Seattle', 'Vancouver'] },
+    'UTC-7': { abbreviations: ['MST', 'PDT'], cities: ['Denver', 'Phoenix', 'Calgary'] },
+    'UTC-6': { abbreviations: ['CST', 'MDT'], cities: ['Chicago', 'Dallas', 'Mexico City'] },
+    'UTC-5': { abbreviations: ['EST', 'CDT'], cities: ['New York', 'Toronto', 'Miami'] },
+    'UTC-4.5': { abbreviations: ['VET'], cities: ['Caracas'] },
+    'UTC-4': { abbreviations: ['AST', 'EDT'], cities: ['Halifax', 'Santiago', 'La Paz'] },
+    'UTC-3.5': { abbreviations: ['NST'], cities: ['Newfoundland'] },
+    'UTC-3': { abbreviations: ['ART', 'BRT'], cities: ['Buenos Aires', 'São Paulo', 'Montevideo'] },
+    'UTC-2': { abbreviations: ['GST'], cities: ['South Georgia'] },
+    'UTC-1': { abbreviations: ['CVT'], cities: ['Cape Verde', 'Azores'] },
+    'UTC+0': { abbreviations: ['GMT', 'UTC'], cities: ['London', 'Dublin', 'Lisbon'] },
+    'UTC+1': { abbreviations: ['CET'], cities: ['Berlin', 'Paris', 'Rome', 'Madrid'] },
+    'UTC+2': { abbreviations: ['EET'], cities: ['Cairo', 'Helsinki', 'Athens', 'Kiev'] },
+    'UTC+3': { abbreviations: ['MSK'], cities: ['Moscow', 'Istanbul', 'Riyadh', 'Nairobi'] },
+    'UTC+3.5': { abbreviations: ['IRST'], cities: ['Tehran'] },
+    'UTC+4': { abbreviations: ['GST'], cities: ['Dubai', 'Baku', 'Tbilisi'] },
+    'UTC+4.5': { abbreviations: ['AFT'], cities: ['Kabul'] },
+    'UTC+5': { abbreviations: ['PKT'], cities: ['Karachi', 'Tashkent', 'Yekaterinburg'] },
+    'UTC+5.5': { abbreviations: ['IST'], cities: ['Mumbai', 'Delhi', 'Kolkata', 'Bangalore'] },
+    'UTC+5.75': { abbreviations: ['NPT'], cities: ['Kathmandu'] },
+    'UTC+6': { abbreviations: ['BST'], cities: ['Dhaka', 'Almaty', 'Omsk'] },
+    'UTC+6.5': { abbreviations: ['MMT'], cities: ['Yangon'] },
+    'UTC+7': { abbreviations: ['ICT'], cities: ['Bangkok', 'Jakarta', 'Ho Chi Minh'] },
+    'UTC+8': { abbreviations: ['CST', 'SGT'], cities: ['Beijing', 'Singapore', 'Manila', 'Perth'] },
+    'UTC+9': { abbreviations: ['JST', 'KST'], cities: ['Tokyo', 'Seoul', 'Pyongyang'] },
+    'UTC+9.5': { abbreviations: ['ACST'], cities: ['Adelaide', 'Darwin'] },
+    'UTC+10': { abbreviations: ['AEST'], cities: ['Sydney', 'Melbourne', 'Brisbane'] },
+    'UTC+11': { abbreviations: ['NCT'], cities: ['New Caledonia', 'Solomon Islands'] },
+    'UTC+12': { abbreviations: ['NZST'], cities: ['Auckland', 'Wellington', 'Fiji'] },
+    'UTC+13': { abbreviations: ['NZDT'], cities: ['Auckland (DST)', 'Samoa'] },
+    'UTC+14': { abbreviations: ['LINT'], cities: ['Line Islands', 'Kiribati'] },
   };
   
-  return timezoneMap[gmtOffset] || { abbreviations: [], cities: [] };
+  // Also check with GMT prefix for backward compatibility
+  return timezoneMap[normalizedOffset] || timezoneMap[gmtOffset] || { abbreviations: [], cities: [] };
 };
 
 export const formatTimezoneDisplay = (gmtOffset: string): string => {
@@ -149,11 +160,12 @@ export const formatTimezoneDisplay = (gmtOffset: string): string => {
 };
 
 export const getAllTimezones = (): string[] => {
-  const timezones: string[] = [];
-  for (let i = -12; i <= 14; i++) {
-    const sign = i >= 0 ? '+' : '';
-    const gmtOffset = `GMT${sign}${i}`;
-    timezones.push(gmtOffset);
-  }
+  const timezones: string[] = [
+    'UTC-12', 'UTC-11', 'UTC-10', 'UTC-9', 'UTC-8', 'UTC-7', 'UTC-6', 'UTC-5',
+    'UTC-4.5', 'UTC-4', 'UTC-3.5', 'UTC-3', 'UTC-2', 'UTC-1', 'UTC+0',
+    'UTC+1', 'UTC+2', 'UTC+3', 'UTC+3.5', 'UTC+4', 'UTC+4.5', 'UTC+5',
+    'UTC+5.5', 'UTC+5.75', 'UTC+6', 'UTC+6.5', 'UTC+7', 'UTC+8', 'UTC+9',
+    'UTC+9.5', 'UTC+10', 'UTC+11', 'UTC+12', 'UTC+13', 'UTC+14'
+  ];
   return timezones;
 }

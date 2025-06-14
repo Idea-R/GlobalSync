@@ -1,7 +1,8 @@
-import React from 'react';
-import { Plus, Users, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Users, Target, Grid, List } from 'lucide-react';
 import { TeamMember } from '../types';
 import { MemberCard } from './MemberCard';
+import { TeamList } from './TeamList';
 
 interface TeamGridProps {
   teamMembers: TeamMember[];
@@ -18,6 +19,8 @@ export const TeamGrid: React.FC<TeamGridProps> = ({
   onAddMember,
   theme,
 }) => {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
   const availableMembers = teamMembers.filter(member => 
     member.status === 'vibing' || member.status === 'pair'
   ).length;
@@ -99,6 +102,42 @@ export const TeamGrid: React.FC<TeamGridProps> = ({
             </div>
           )}
           
+          {/* View Toggle */}
+          <div className={`flex rounded-lg overflow-hidden border ${
+            theme === 'dark' ? 'border-tactical-gray' : 'border-gray-300'
+          }`}>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-2 flex items-center transition-colors ${
+                viewMode === 'grid'
+                  ? theme === 'dark'
+                    ? 'bg-tactical-amber text-tactical-black'
+                    : 'bg-blue-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-tactical-black text-gray-400 hover:text-white'
+                    : 'bg-gray-50 text-gray-600 hover:text-gray-900'
+              }`}
+              title="Grid View"
+            >
+              <Grid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-2 flex items-center transition-colors ${
+                viewMode === 'list'
+                  ? theme === 'dark'
+                    ? 'bg-tactical-amber text-tactical-black'
+                    : 'bg-blue-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-tactical-black text-gray-400 hover:text-white'
+                    : 'bg-gray-50 text-gray-600 hover:text-gray-900'
+              }`}
+              title="List View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+          
           <button
             onClick={onAddMember}
             className={`flex items-center px-4 py-2 rounded-lg transition-colors font-medium ${
@@ -113,24 +152,33 @@ export const TeamGrid: React.FC<TeamGridProps> = ({
         </div>
       </div>
 
-      {/* Team Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {teamMembers.map((member, index) => (
-          <div
-            key={member.id}
-            style={{
-              animationDelay: `${index * 150}ms`,
-            }}
-          >
-            <MemberCard
-              member={member}
-              onUpdateMember={onUpdateMember}
-              onDeleteMember={onDeleteMember}
-              theme={theme}
-            />
-          </div>
-        ))}
-      </div>
+      {/* Team View */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {teamMembers.map((member, index) => (
+            <div
+              key={member.id}
+              style={{
+                animationDelay: `${index * 150}ms`,
+              }}
+            >
+              <MemberCard
+                member={member}
+                onUpdateMember={onUpdateMember}
+                onDeleteMember={onDeleteMember}
+                theme={theme}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <TeamList
+          teamMembers={teamMembers}
+          onUpdateMember={onUpdateMember}
+          onDeleteMember={onDeleteMember}
+          theme={theme}
+        />
+      )}
     </div>
   );
 };

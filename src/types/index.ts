@@ -1,5 +1,6 @@
 export interface PersonalInfo {
   name: string;
+  title?: string;
   timezone: string;
   status: StatusType;
   workHours: string;
@@ -11,6 +12,7 @@ export interface PersonalInfo {
 export interface TeamMember {
   id: string;
   name: string;
+  title?: string;
   timezone: string;
   status: StatusType;
   workHours: string;

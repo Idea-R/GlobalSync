@@ -1,10 +1,19 @@
 import { AppData, PersonalInfo, TeamMember } from '../types';
+import { detectUserTimezone } from './timezone';
 
 const STORAGE_KEY = 'globalsync-data';
 
+// Migration function to convert GMT to UTC
+const migrateTimezone = (timezone: string): string => {
+  if (timezone.startsWith('GMT')) {
+    return timezone.replace('GMT', 'UTC');
+  }
+  return timezone;
+};
+
 const getDefaultPersonalInfo = (): PersonalInfo => ({
   name: '',
-  timezone: 'GMT+0',
+  timezone: detectUserTimezone(),
   status: 'vibing',
   workHours: '9-17',
   sleepHours: '23-7',
@@ -26,6 +35,19 @@ export const loadData = (): AppData => {
     }
     
     const parsed = JSON.parse(stored);
+    
+    // Migrate timezones from GMT to UTC
+    if (parsed.personalInfo && parsed.personalInfo.timezone) {
+      parsed.personalInfo.timezone = migrateTimezone(parsed.personalInfo.timezone);
+    }
+    
+    if (parsed.teamMembers) {
+      parsed.teamMembers = parsed.teamMembers.map((member: TeamMember) => ({
+        ...member,
+        timezone: migrateTimezone(member.timezone),
+      }));
+    }
+    
     return {
       ...getDefaultData(),
       ...parsed,

@@ -121,7 +121,26 @@ export const MemberCard: React.FC<MemberCardProps> = ({
           }`}>
             {member.name}
           </h3>
-          <div className={`flex items-center text-sm ${
+          <div className="h-6 mt-1 flex items-center">
+            {member.title ? (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                theme === 'dark'
+                  ? 'bg-tactical-amber/20 text-tactical-amber border border-tactical-amber/30'
+                  : 'bg-blue-100 text-blue-800 border border-blue-200'
+              }`}>
+                {member.title}
+              </span>
+            ) : (
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                theme === 'dark'
+                  ? 'bg-tactical-gray/30 text-gray-500 border border-tactical-gray/50'
+                  : 'bg-gray-100 text-gray-500 border border-gray-200'
+              }`}>
+                No role assigned
+              </span>
+            )}
+          </div>
+          <div className={`flex items-center text-sm mt-1 ${
             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
           }`}>
             <MapPin className="w-3 h-3 mr-1" />
@@ -163,26 +182,30 @@ export const MemberCard: React.FC<MemberCardProps> = ({
         </div>
       </div>
 
-      {/* Schedule Visualization */}
+      {/* Schedule Information */}
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className={`text-xs uppercase tracking-wider ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-          }`}>Schedule</span>
-          <span className={`text-xs ${
+        <div className={`rounded-lg p-3 border ${
+          theme === 'dark' 
+            ? 'bg-tactical-black border-tactical-gray' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-xs uppercase tracking-wider font-medium ${
+              theme === 'dark' ? 'text-tactical-amber' : 'text-blue-600'
+            }`}>Schedule</span>
+            <div className={`w-2 h-2 rounded-full ${periodColors[currentPeriod]} animate-tactical-pulse`} />
+          </div>
+          <div className={`text-xs mt-2 space-y-1 ${
             theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
           }`}>
-            Work: {member.workHours} | Sleep: {member.sleepHours}
-          </span>
-        </div>
-        
-        <div className={`h-2 rounded-full overflow-hidden flex ${
-          theme === 'dark' ? 'bg-tactical-black' : 'bg-gray-200'
-        }`}>
-          {/* This is a simplified schedule bar - in production you'd calculate exact positions */}
-          <div className="w-1/3 bg-radar-green" title="Available" />
-          <div className="w-1/3 bg-steel-blue" title="Work Hours" />
-          <div className="w-1/3 bg-warning-red" title="Sleep Hours" />
+            <div>Work: {member.workHours || 'Not set'}</div>
+            <div>Sleep: {member.sleepHours || 'Not set'}</div>
+            <div className={`text-xs font-medium ${
+              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}>
+              Currently: {periodLabels[currentPeriod]}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -216,7 +239,7 @@ export const MemberCard: React.FC<MemberCardProps> = ({
         </button>
         
         {showStatusDropdown && (
-          <div className={`fixed top-20 left-4 right-4 mt-2 rounded-lg shadow-2xl z-[40] border backdrop-blur-sm ${
+          <div className={`fixed top-20 left-4 right-4 mt-2 rounded-lg shadow-2xl z-[50] border backdrop-blur-sm ${
             theme === 'dark' 
               ? 'bg-tactical-black border-tactical-gray' 
               : 'bg-white border-gray-200'

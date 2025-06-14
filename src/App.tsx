@@ -4,6 +4,7 @@ import { TeamGrid } from './components/TeamGrid';
 import { AddMemberModal } from './components/AddMemberModal';
 import { CollaborationPanel } from './components/CollaborationPanel';
 import { HelpModal } from './components/HelpModal';
+import { SettingsModal } from './components/SettingsModal';
 import { BackgroundGlobe } from './components/BackgroundGlobe';
 import { TimezoneOverride } from './components/TimezoneOverride';
 import { AppData, PersonalInfo, TeamMember } from './types';
@@ -15,6 +16,7 @@ function App() {
   const [data, setData] = useState<AppData>(loadData);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showTimezoneOverride, setShowTimezoneOverride] = useState(false);
   const [timezoneOverride, setTimezoneOverride] = useState<number | undefined>(undefined);
 
@@ -57,6 +59,10 @@ function App() {
     setShowHelp(!showHelp);
   };
 
+  const handleToggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
+
   const handleToggleTimezoneOverride = () => {
     setShowTimezoneOverride(!showTimezoneOverride);
   };
@@ -75,7 +81,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
+    <div className={`min-h-screen transition-colors duration-300 relative ${
       data.theme === 'dark' 
         ? 'bg-tactical-black text-white'
         : 'bg-gray-100 text-gray-900'
@@ -91,7 +97,7 @@ function App() {
         userTimezoneOverride={timezoneOverride}
       />
       
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center mb-6">
@@ -122,6 +128,7 @@ function App() {
           onToggleTheme={handleToggleTheme}
           onToggleHelp={handleToggleHelp}
           onToggleTimezoneOverride={handleToggleTimezoneOverride}
+          onToggleSettings={handleToggleSettings}
           onExportAllAppData={handleExportAllAppData}
           onImportAllAppData={handleImportAllAppData}
           theme={data.theme}
@@ -157,6 +164,17 @@ function App() {
         <HelpModal
           isOpen={showHelp}
           onClose={() => setShowHelp(false)}
+          theme={data.theme}
+        />
+
+        {/* Settings Modal */}
+        <SettingsModal
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          personalInfo={data.personalInfo}
+          onUpdatePersonalInfo={handleUpdatePersonalInfo}
+          onImportAllAppData={handleImportAllAppData}
+          appData={data}
           theme={data.theme}
         />
 

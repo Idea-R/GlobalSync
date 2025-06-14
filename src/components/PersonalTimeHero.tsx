@@ -10,6 +10,7 @@ import { AppData } from '../types';
 import { ProfileInitialization } from './PersonalTimeHero/components/ProfileInitialization';
 import { useDataImportExport } from './PersonalTimeHero/hooks/useDataImportExport';
 import { useNameEditor } from './PersonalTimeHero/hooks/useNameEditor';
+import { useTitleEditor } from './PersonalTimeHero/hooks/useTitleEditor';
 
 interface PersonalTimeHeroProps {
   personalInfo: PersonalInfo;
@@ -17,6 +18,7 @@ interface PersonalTimeHeroProps {
   onToggleTheme: () => void;
   onToggleHelp: () => void;
   onToggleTimezoneOverride: () => void;
+  onToggleSettings: () => void;
   onExportAllAppData: () => void;
   onImportAllAppData: (data: AppData) => void;
   theme: 'dark' | 'light';
@@ -30,6 +32,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
   onToggleTheme,
   onToggleHelp,
   onToggleTimezoneOverride,
+  onToggleSettings,
   onExportAllAppData,
   onImportAllAppData,
   theme,
@@ -38,7 +41,6 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [flavorText, setFlavorText] = useState('');
 
@@ -59,6 +61,14 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
     handleNameEdit,
     handleNameKeyPress,
   } = useNameEditor(personalInfo, onUpdatePersonalInfo);
+
+  const {
+    editingTitle,
+    tempTitle,
+    setTempTitle,
+    handleTitleEdit,
+    handleTitleKeyPress,
+  } = useTitleEditor(personalInfo, onUpdatePersonalInfo);
 
   // Time and status management
   useEffect(() => {
@@ -127,13 +137,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
         ? 'bg-tactical-charcoal border-tactical-gray' 
         : 'bg-white border-gray-200 shadow-lg'
     }`}>
-      {/* Backdrop overlay for settings */}
-      {showSettings && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-[60]"
-          onClick={() => setShowSettings(false)}
-        />
-      )}
+
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
@@ -187,7 +191,47 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
             <p className={`text-xs sm:text-sm ${
               theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
             }`}>
-              Elite AI Developer Operations • {personalInfo.timezone}
+              {editingTitle ? (
+                <input
+                  type="text"
+                  value={tempTitle}
+                  onChange={(e) => setTempTitle(e.target.value)}
+                  onKeyDown={handleTitleKeyPress}
+                  onBlur={handleTitleEdit}
+                  placeholder="Enter your role/title"
+                  className={`px-2 py-0.5 rounded border text-xs sm:text-sm bg-transparent focus:outline-none ${
+                    theme === 'dark'
+                      ? 'text-white border-tactical-amber placeholder-gray-500'
+                      : 'text-gray-900 border-blue-500 placeholder-gray-400'
+                  }`}
+                  autoFocus
+                />
+              ) : (
+                <>
+                  {personalInfo.title ? (
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mr-2 cursor-pointer hover:opacity-80 transition-opacity ${
+                      theme === 'dark'
+                        ? 'bg-tactical-amber/20 text-tactical-amber border border-tactical-amber/30'
+                        : 'bg-blue-100 text-blue-800 border border-blue-200'
+                    }`} onClick={handleTitleEdit}>
+                      {personalInfo.title}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleTitleEdit}
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mr-2 hover:opacity-80 transition-opacity ${
+                        theme === 'dark'
+                          ? 'bg-tactical-gray/50 text-gray-400 border border-tactical-gray hover:border-tactical-amber'
+                          : 'bg-gray-100 text-gray-500 border border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <Edit3 className="w-3 h-3 mr-1" />
+                      Add Role
+                    </button>
+                  )}
+                  • Elite AI Developer Operations • {personalInfo.timezone}
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -213,10 +257,10 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
               theme === 'dark'
                 ? 'bg-tactical-black border-tactical-gray hover:border-tactical-amber'
                 : 'bg-gray-50 border-gray-300 hover:border-blue-500'
-            }`}
-            title="Quick Export All Data"
+            } ${appCopySuccess ? 'ring-2 ring-green-500' : ''}`}
+            title={appCopySuccess ? "Exported to Clipboard!" : "Export All Data to Clipboard"}
           >
-            <Upload className={`w-4 h-4 sm:w-5 sm:h-5 ${
+            <Upload className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
               appCopySuccess 
                 ? (theme === 'dark' ? 'text-radar-green' : 'text-green-600')
                 : (theme === 'dark' ? 'text-tactical-amber' : 'text-blue-600')
@@ -254,7 +298,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
           </button>
           
           <button
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={onToggleSettings}
             className={`p-2 rounded-lg border transition-colors ${
               theme === 'dark'
                 ? 'bg-tactical-black border-tactical-gray hover:border-tactical-amber'
@@ -355,7 +399,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
           </div>
           
           {showStatusDropdown && (
-            <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-xl z-[70] border backdrop-blur-sm ${
+            <div className={`absolute top-full left-0 right-0 mt-2 rounded-lg shadow-xl z-[60] border backdrop-blur-sm ${
               theme === 'dark' 
                 ? 'bg-tactical-black border-tactical-gray' 
                 : 'bg-white border-gray-200'
@@ -401,107 +445,7 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
         </p>
       </div>
 
-      {/* Settings Panel with HelpModal-style backdrop */}
-      {showSettings && (
-        <>
-          {/* Full screen backdrop with blur */}
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-tactical z-[50]" onClick={() => setShowSettings(false)} />
-          
-          {/* Settings Modal - Mobile responsive */}
-          <div className={`fixed top-4 sm:top-20 left-2 right-2 sm:left-4 sm:right-4 mt-2 rounded-lg shadow-2xl z-[60] border animate-tactical-deploy max-h-[90vh] overflow-y-auto ${
-            theme === 'dark' 
-              ? 'bg-tactical-charcoal border-tactical-gray' 
-              : 'bg-white border-gray-200 shadow-2xl'
-          }`}>
-          <div className={`flex items-center justify-between px-4 sm:px-6 py-4 border-b ${
-            theme === 'dark' ? 'border-tactical-gray' : 'border-gray-200'
-          }`}>
-            <div className="flex items-center">
-              <Settings className={`w-4 h-4 sm:w-5 sm:h-5 mr-2 ${
-                theme === 'dark' ? 'text-tactical-amber' : 'text-blue-600'
-              }`} />
-              <h3 className={`text-base sm:text-lg font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}>Configuration</h3>
-            </div>
-            <button
-              onClick={() => setShowSettings(false)}
-              className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 border ${
-                theme === 'dark' 
-                  ? 'hover:bg-tactical-gray text-gray-400 hover:text-white border-tactical-gray hover:border-tactical-amber' 
-                  : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700 border-gray-300 hover:border-blue-500'
-              }`}
-              title="Close Configuration"
-            >
-              <X className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-          </div>
-          
-          <div className="px-4 sm:px-6 py-4">
-            <div className="mb-6">
-              <ScheduleSelector
-                workHours={personalInfo.workHours}
-                sleepHours={personalInfo.sleepHours}
-                autoStatus={personalInfo.autoStatus}
-                onScheduleChange={(workHours, sleepHours) => 
-                  onUpdatePersonalInfo({ workHours, sleepHours })
-                }
-                onAutoStatusChange={(autoStatus) => 
-                  onUpdatePersonalInfo({ autoStatus })
-                }
-                theme={theme}
-              />
-            </div>
-            
-            {/* Import/Export Data - Using hook */}
-            <div className={`pt-4 border-t ${
-              theme === 'dark' ? 'border-tactical-gray' : 'border-gray-200'
-            }`}>
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    Restore from Backup
-                  </label>
-                  <div className="space-y-2">
-                    <textarea
-                      value={importString}
-                      onChange={(e) => setImportString(e.target.value)}
-                      placeholder="Paste GlobalSyncApp:// string here"
-                      className={`w-full px-3 py-2 rounded-lg resize-none focus:outline-none text-sm ${
-                        theme === 'dark'
-                          ? 'bg-tactical-charcoal border border-tactical-gray text-white placeholder-gray-500 focus:border-tactical-amber'
-                          : 'bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 focus:border-blue-500'
-                      }`}
-                      rows={1}
-                    />
-                    <button
-                      onClick={handleImportAllData}
-                      disabled={!importString.trim()}
-                      className={`w-full flex items-center justify-center px-4 py-2 rounded-lg transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
-                        theme === 'dark'
-                          ? 'bg-radar-green text-tactical-black hover:bg-green-400'
-                          : 'bg-green-600 text-white hover:bg-green-700'
-                      }`}
-                    >
-                      Import All Data
-                    </button>
-                    {importError && (
-                      <p className={`text-xs ${
-                        theme === 'dark' ? 'text-warning-red' : 'text-red-600'
-                      }`}>
-                        {importError}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-        </>
-      )}
+
     </div>
   );
 };
