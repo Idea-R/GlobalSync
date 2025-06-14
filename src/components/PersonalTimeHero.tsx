@@ -16,10 +16,12 @@ interface PersonalTimeHeroProps {
   onUpdatePersonalInfo: (updates: Partial<PersonalInfo>) => void;
   onToggleTheme: () => void;
   onToggleHelp: () => void;
+  onToggleTimezoneOverride: () => void;
   onExportAllAppData: () => void;
   onImportAllAppData: (data: AppData) => void;
   theme: 'dark' | 'light';
   appData: AppData;
+  timezoneOverride?: number;
 }
 
 export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
@@ -27,10 +29,12 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
   onUpdatePersonalInfo,
   onToggleTheme,
   onToggleHelp,
+  onToggleTimezoneOverride,
   onExportAllAppData,
   onImportAllAppData,
   theme,
   appData,
+  timezoneOverride,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
@@ -230,6 +234,22 @@ export const PersonalTimeHero: React.FC<PersonalTimeHeroProps> = ({
           >
             <HelpCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${
               theme === 'dark' ? 'text-tactical-amber' : 'text-blue-600'
+            }`} />
+          </button>
+          
+          <button
+            onClick={onToggleTimezoneOverride}
+            className={`p-2 rounded-lg border transition-colors ${
+              theme === 'dark'
+                ? 'bg-tactical-black border-tactical-gray hover:border-tactical-amber'
+                : 'bg-gray-50 border-gray-300 hover:border-blue-500'
+            } ${timezoneOverride !== undefined ? 'ring-2 ring-blue-500' : ''}`}
+            title={`Timezone Override ${timezoneOverride !== undefined ? '(Active)' : ''}`}
+          >
+            <Globe className={`w-4 h-4 sm:w-5 sm:h-5 ${
+              timezoneOverride !== undefined 
+                ? 'text-blue-500' 
+                : (theme === 'dark' ? 'text-tactical-amber' : 'text-blue-600')
             }`} />
           </button>
           

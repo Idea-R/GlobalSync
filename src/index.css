@@ -40,3 +40,9 @@
   font-weight: 700;
   letter-spacing: -0.025em;
 }
+
+/* Ensure main content stays above globe */
+.container {
+  position: relative;
+  z-index: 10;
+}

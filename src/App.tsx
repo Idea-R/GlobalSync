@@ -4,6 +4,8 @@ import { TeamGrid } from './components/TeamGrid';
 import { AddMemberModal } from './components/AddMemberModal';
 import { CollaborationPanel } from './components/CollaborationPanel';
 import { HelpModal } from './components/HelpModal';
+import { BackgroundGlobe } from './components/BackgroundGlobe';
+import { TimezoneOverride } from './components/TimezoneOverride';
 import { AppData, PersonalInfo, TeamMember } from './types';
 import { loadData, saveData, addTeamMember, updateTeamMember, removeTeamMember } from './utils/storage';
 import { generateAppShareString, copyToClipboard } from './utils/shareString';
@@ -13,6 +15,8 @@ function App() {
   const [data, setData] = useState<AppData>(loadData);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showTimezoneOverride, setShowTimezoneOverride] = useState(false);
+  const [timezoneOverride, setTimezoneOverride] = useState<number | undefined>(undefined);
 
   // Auto-save to localStorage whenever data changes
   useEffect(() => {
@@ -53,6 +57,14 @@ function App() {
     setShowHelp(!showHelp);
   };
 
+  const handleToggleTimezoneOverride = () => {
+    setShowTimezoneOverride(!showTimezoneOverride);
+  };
+
+  const handleTimezoneChange = (offset: number | undefined) => {
+    setTimezoneOverride(offset);
+  };
+
   const handleExportAllAppData = async () => {
     const appShareString = generateAppShareString(data);
     await copyToClipboard(appShareString);
@@ -68,6 +80,17 @@ function App() {
         ? 'bg-tactical-black text-white'
         : 'bg-gray-100 text-gray-900'
     }`}>
+      {/* Animated Globe Background */}
+      <BackgroundGlobe 
+        globeSize={1000}
+        clockSize={40}
+        rotationSpeed={3}
+        showClockLabels={true}
+        pauseOnHover={true}
+        opacity={0.15}
+        userTimezoneOverride={timezoneOverride}
+      />
+      
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -98,10 +121,12 @@ function App() {
           onUpdatePersonalInfo={handleUpdatePersonalInfo}
           onToggleTheme={handleToggleTheme}
           onToggleHelp={handleToggleHelp}
+          onToggleTimezoneOverride={handleToggleTimezoneOverride}
           onExportAllAppData={handleExportAllAppData}
           onImportAllAppData={handleImportAllAppData}
           theme={data.theme}
           appData={data}
+          timezoneOverride={timezoneOverride}
         />
 
         {/* Collaboration Panel */}
@@ -132,6 +157,17 @@ function App() {
         <HelpModal
           isOpen={showHelp}
           onClose={() => setShowHelp(false)}
+          theme={data.theme}
+        />
+
+        {/* Timezone Override Modal */}
+        <TimezoneOverride
+          isOpen={showTimezoneOverride}
+          onClose={() => setShowTimezoneOverride(false)}
+          currentOffset={timezoneOverride ?? -new Date().getTimezoneOffset() / 60}
+          detectedOffset={-new Date().getTimezoneOffset() / 60}
+          isUsingOverride={timezoneOverride !== undefined}
+          onTimezoneChange={handleTimezoneChange}
           theme={data.theme}
         />
 
@@ -199,27 +235,10 @@ function App() {
           <p className={`text-xs ${
             data.theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
           }`}>
-            Mission: Global coordination for AI-assisted development teams
+            © 2024 idea/R. Tactical precision meets AI innovation.
           </p>
         </footer>
-
-        {/* Bolt.new Badge */}
-        <div className="fixed bottom-4 right-4 z-40">
-          <a 
-            href="https://bolt.new/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="block transition-all duration-300 hover:shadow-2xl"
-          >
-            <img 
-              src="https://storage.bolt.army/logotext_poweredby_360w.png" 
-              alt="Powered by Bolt.new badge" 
-                                className="h-8 md:h-10 w-auto opacity-90 hover:opacity-100 hover:scale-110 transition-all duration-300"
-            />
-          </a>
-        </div>
       </div>
-
     </div>
   );
 }
