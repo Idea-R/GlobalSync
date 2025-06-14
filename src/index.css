@@ -1,3 +1,42 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Animations and Styles */
+@keyframes tacticalDeploy {
+  0% { 
+    transform: translateY(20px) scale(0.95); 
+    opacity: 0;
+  }
+  100% { 
+    transform: translateY(0) scale(1); 
+    opacity: 1;
+  }
+}
+
+@keyframes tacticalPulse {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(255, 176, 0, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(255, 176, 0, 0.6);
+  }
+}
+
+.animate-tactical-deploy {
+  animation: tacticalDeploy 0.6s ease-out forwards;
+}
+
+.animate-tactical-pulse {
+  animation: tacticalPulse 2s ease-in-out infinite;
+}
+
+.backdrop-blur-tactical {
+  backdrop-filter: blur(8px);
+}
+
+.font-tactical {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'system-ui', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
