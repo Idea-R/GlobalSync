@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { LandingPage } from './LandingPage';
 import { NetworkingPage } from './NetworkingPage';
+import { TeamsPage } from './TeamsPage';
 import App from '../App';
 
 type AppMode = 'landing' | 'demo' | 'authenticated';
 type Page = 'dashboard' | 'networking';
+type Page = 'dashboard' | 'networking' | 'teams';
 
 interface User {
   id: string;
@@ -138,6 +140,21 @@ export const AppRouter: React.FC = () => {
                 >
                   Network
                 </button>
+                
+                <button
+                  onClick={() => setCurrentPage('teams')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage === 'teams'
+                      ? theme === 'dark'
+                        ? 'bg-tactical-amber text-tactical-black'
+                        : 'bg-blue-600 text-white'
+                      : theme === 'dark'
+                        ? 'text-gray-300 hover:text-white hover:bg-tactical-gray'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  Teams
+                </button>
               </div>
             </div>
 
@@ -193,8 +210,10 @@ export const AppRouter: React.FC = () => {
       {/* Page Content */}
       {currentPage === 'dashboard' ? (
         <App />
-      ) : (
+      ) : currentPage === 'networking' ? (
         <NetworkingPage theme={theme} user={user} />
+      ) : (
+        <TeamsPage theme={theme} user={user} />
       )}
     </div>
   );
